@@ -118,10 +118,21 @@ function App() {
 
   return (
     <main className="site-shell">
-      <div className="topline">
-        ENTREGAS NA REGIÃO DE CAMPINAS <span>•</span> PEDIDOS ATÉ 16H CHEGAM
-        AMANHÃ
-      </div>
+      <section className="topline" aria-label="Oferta da semana">
+        <img
+          src="https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=1600&q=85"
+          alt="Ovos frescos em uma cesta"
+        />
+        <div className="topline-content">
+          <p>Direto da nossa granja</p>
+          <strong>
+            O sabor começa
+            <br />
+            <i>no quintal.</i>
+          </strong>
+          <span>Ovos frescos para deixar sua mesa mais gostosa.</span>
+        </div>
+      </section>
       <header className="header">
         <a
           className="brand"

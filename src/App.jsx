@@ -11,6 +11,10 @@ const products = [
     price: 14.9,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Chicken%20eggs.jpg?width=900",
+    gallery: [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Chicken%20eggs.jpg?width=900",
+      "https://upload.wikimedia.org/wikipedia/commons/1/12/6-Pack-Chicken-Eggs.jpg",
+    ],
     tone: "sun",
   },
   {
@@ -22,6 +26,10 @@ const products = [
     price: 22.5,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Duck%20eggs.jpg?width=900",
+    gallery: [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Duck%20eggs.jpg?width=900",
+      "https://upload.wikimedia.org/wikipedia/commons/3/34/A_one_boxed_Duck_Eggs_and_Quail_Eggs_on_the_Local_Food_Store_in_Tuen_Mun.jpg",
+    ],
     tone: "sage",
   },
   {
@@ -33,6 +41,10 @@ const products = [
     price: 11.9,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Quail%20eggs.jpg?width=900",
+    gallery: [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Quail%20eggs.jpg?width=900",
+      "https://upload.wikimedia.org/wikipedia/commons/a/ab/Quail_Eggs_%284278252407%29.jpg",
+    ],
     tone: "rose",
   },
   {
@@ -44,6 +56,10 @@ const products = [
     price: 29.9,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Goose%20eggs.jpg?width=900",
+    gallery: [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Goose%20eggs.jpg?width=900",
+      "https://upload.wikimedia.org/wikipedia/commons/2/28/A_basket_of_Goose_Eggs.jpg",
+    ],
     tone: "mist",
   },
   {
@@ -55,6 +71,10 @@ const products = [
     price: 25.9,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Domesticated%20turkey.jpg?width=900",
+    gallery: [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Domesticated%20turkey.jpg?width=900",
+      "https://upload.wikimedia.org/wikipedia/commons/8/83/Wild_turkey_eggs_from_Ontario.jpg",
+    ],
     tone: "clay",
   },
 ];
@@ -72,15 +92,48 @@ function formatPrice(price) {
   return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function ProductCard({ product, onAdd }) {
+function ProductCard({ product, onAdd, onOpenGallery }) {
+  const [imageIndex, setImageIndex] = useState(0);
+  const currentImage = product.gallery[imageIndex];
+
+  const changeImage = (direction) => {
+    setImageIndex(
+      (current) =>
+        (current + direction + product.gallery.length) % product.gallery.length,
+    );
+  };
+
   return (
     <article className={`product-card ${product.tone}`}>
       <div className="product-image-wrap">
-        <img
-          src={product.image}
-          alt={`Ovos de ${product.type.toLowerCase()}`}
-          className="product-image"
-        />
+        <button
+          className="product-image-trigger"
+          onClick={() => onOpenGallery(product, imageIndex)}
+          aria-label={`Ver imagens de ${product.name}`}
+        >
+          <img
+            src={currentImage}
+            alt={`Ovos de ${product.type.toLowerCase()}`}
+            className="product-image"
+            onError={(event) => {
+              event.currentTarget.src = product.image;
+            }}
+          />
+        </button>
+        <button
+          className="gallery-arrow gallery-arrow-left"
+          onClick={() => changeImage(-1)}
+          aria-label={`Imagem anterior de ${product.name}`}
+        >
+          ‹
+        </button>
+        <button
+          className="gallery-arrow gallery-arrow-right"
+          onClick={() => changeImage(1)}
+          aria-label={`Próxima imagem de ${product.name}`}
+        >
+          ›
+        </button>
         <span className="product-tag">fresco</span>
         <button className="favorite" aria-label={`Favoritar ${product.name}`}>
           ♡
@@ -109,12 +162,14 @@ function App() {
   const [activeCategory, setActiveCategory] = useState("todos");
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [gallery, setGallery] = useState(null);
   const visibleProducts =
     activeCategory === "todos"
       ? products
       : products.filter((product) => product.category === activeCategory);
   const addToCart = (product) => setCart((current) => [...current, product]);
   const cartTotal = cart.reduce((total, item) => total + item.price, 0);
+  const closeGallery = () => setGallery(null);
 
   return (
     <main className="site-shell">
@@ -258,7 +313,14 @@ function App() {
         </div>
         <div className="product-grid">
           {visibleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onAdd={addToCart} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAdd={addToCart}
+              onOpenGallery={(selectedProduct, imageIndex) =>
+                setGallery({ product: selectedProduct, imageIndex })
+              }
+            />
           ))}
         </div>
       </section>
@@ -285,6 +347,41 @@ function App() {
         <span>feito com calma, servido com carinho</span>
         <span>instagram ↗</span>
       </footer>
+      {gallery && (
+        <div className="gallery-overlay" onClick={closeGallery}>
+          <div
+            className="gallery-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Imagens de ${gallery.product.name}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="gallery-close"
+              onClick={closeGallery}
+              aria-label="Fechar galeria"
+            >
+              ×
+            </button>
+            <img
+              src={gallery.product.gallery[gallery.imageIndex]}
+              alt={`Imagem ampliada de ${gallery.product.name}`}
+              onError={(event) => {
+                event.currentTarget.src = gallery.product.image;
+              }}
+            />
+            <div className="gallery-modal-footer">
+              <div>
+                <span>{gallery.product.type}</span>
+                <strong>{gallery.product.name}</strong>
+              </div>
+              <span>
+                {gallery.imageIndex + 1}/{gallery.product.gallery.length}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       {cartOpen && (
         <div className="cart-overlay" onClick={() => setCartOpen(false)}>
           <aside

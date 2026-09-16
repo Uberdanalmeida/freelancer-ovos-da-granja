@@ -598,10 +598,32 @@ h2 i {
   padding: 24px 5vw;
   display: flex;
   justify-content: space-between;
-  color: #8a9187;
-  font-size: 9px;
+  border-top: 1px solid #d8ddd0;
+  color: #667365;
+  font-size: 10px;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #c66543;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+.whatsapp-icon {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+.footer a span {
+  font-size: 15px;
+  line-height: 1;
+}
+.footer a:hover {
+  color: #26382b;
 }
 .cart-overlay {
   position: fixed;

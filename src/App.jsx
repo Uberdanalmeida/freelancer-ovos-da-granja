@@ -88,6 +88,17 @@ const categories = [
   { id: "codorna", label: "Codorna", icon: "•" },
 ];
 
+const paymentMethods = [
+  { id: "pix", label: "Pix", icon: "◇", description: "Aprovação imediata" },
+  { id: "card", label: "Cartão", icon: "▣", description: "Crédito ou débito" },
+  {
+    id: "cash",
+    label: "Dinheiro",
+    icon: "◌",
+    description: "Pagamento na entrega",
+  },
+];
+
 function formatPrice(price) {
   return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
@@ -163,6 +174,9 @@ function App() {
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [gallery, setGallery] = useState(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("pix");
+  const [orderPlaced, setOrderPlaced] = useState(false);
   const visibleProducts =
     activeCategory === "todos"
       ? products
@@ -170,6 +184,15 @@ function App() {
   const addToCart = (product) => setCart((current) => [...current, product]);
   const cartTotal = cart.reduce((total, item) => total + item.price, 0);
   const closeGallery = () => setGallery(null);
+  const closeCart = () => {
+    setCartOpen(false);
+    setCheckoutOpen(false);
+    setOrderPlaced(false);
+  };
+  const placeOrder = () => {
+    setOrderPlaced(true);
+    setCart([]);
+  };
 
   return (
     <main className="site-shell">
@@ -383,21 +406,106 @@ function App() {
         </div>
       )}
       {cartOpen && (
-        <div className="cart-overlay" onClick={() => setCartOpen(false)}>
+        <div className="cart-overlay" onClick={closeCart}>
           <aside
             className="cart-drawer"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="drawer-header">
-              <h2>Sua sacola</h2>
-              <button
-                onClick={() => setCartOpen(false)}
-                aria-label="Fechar sacola"
-              >
+              <h2>{checkoutOpen ? "Pagamento" : "Sua sacola"}</h2>
+              <button onClick={closeCart} aria-label="Fechar sacola">
                 ×
               </button>
             </div>
-            {cart.length === 0 ? (
+            {orderPlaced ? (
+              <div className="order-success">
+                <span>✓</span>
+                <h3>Pedido recebido!</h3>
+                <p>Vamos preparar tudo com carinho para você.</p>
+                <button className="checkout-button" onClick={closeCart}>
+                  Voltar para a loja <span>↗</span>
+                </button>
+              </div>
+            ) : checkoutOpen ? (
+              <div className="checkout-content">
+                <p className="checkout-intro">
+                  Escolha como você prefere pagar o seu pedido.
+                </p>
+                <div
+                  className="payment-options"
+                  role="radiogroup"
+                  aria-label="Forma de pagamento"
+                >
+                  {paymentMethods.map((method) => (
+                    <button
+                      key={method.id}
+                      className={`payment-option ${paymentMethod === method.id ? "selected" : ""}`}
+                      onClick={() => setPaymentMethod(method.id)}
+                      role="radio"
+                      aria-checked={paymentMethod === method.id}
+                    >
+                      <span className="payment-icon">{method.icon}</span>
+                      <span>
+                        <b>{method.label}</b>
+                        <small>{method.description}</small>
+                      </span>
+                      <span className="payment-check">✓</span>
+                    </button>
+                  ))}
+                </div>
+                {paymentMethod === "pix" && (
+                  <div className="payment-detail">
+                    <b>Você receberá o código Pix após confirmar.</b>
+                    <span>O pagamento será aprovado em poucos segundos.</span>
+                  </div>
+                )}
+                {paymentMethod === "card" && (
+                  <div className="payment-fields">
+                    <label>
+                      Número do cartão
+                      <input
+                        placeholder="0000 0000 0000 0000"
+                        inputMode="numeric"
+                      />
+                    </label>
+                    <label>
+                      Nome impresso
+                      <input placeholder="Como está no cartão" />
+                    </label>
+                    <div className="payment-field-row">
+                      <label>
+                        Validade
+                        <input placeholder="MM/AA" />
+                      </label>
+                      <label>
+                        CVV
+                        <input placeholder="123" inputMode="numeric" />
+                      </label>
+                    </div>
+                  </div>
+                )}
+                {paymentMethod === "cash" && (
+                  <label className="change-field">
+                    Troco para quanto?
+                    <input placeholder="Ex.: R$ 50,00" inputMode="decimal" />
+                    <small>Deixe em branco se não precisar de troco.</small>
+                  </label>
+                )}
+                <div className="checkout-total">
+                  <span>Total do pedido</span>
+                  <strong>{formatPrice(cartTotal)}</strong>
+                </div>
+                <button className="checkout-button" onClick={placeOrder}>
+                  Confirmar pedido <span>↗</span>
+                </button>
+                <button
+                  className="back-to-cart"
+                  onClick={() => setCheckoutOpen(false)}
+                >
+                  Voltar para a sacola
+                </button>
+              </div>
+            ) : cart.length === 0 ? (
               <div className="empty-cart">
                 <span>♡</span>
                 <p>
@@ -424,7 +532,10 @@ function App() {
                   <span>Total</span>
                   <strong>{formatPrice(cartTotal)}</strong>
                 </div>
-                <button className="checkout-button">
+                <button
+                  className="checkout-button"
+                  onClick={() => setCheckoutOpen(true)}
+                >
                   Finalizar pedido <span>↗</span>
                 </button>
               </>

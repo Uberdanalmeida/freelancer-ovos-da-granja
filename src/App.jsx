@@ -181,8 +181,37 @@ function App() {
     activeCategory === "todos"
       ? products
       : products.filter((product) => product.category === activeCategory);
-  const addToCart = (product) => setCart((current) => [...current, product]);
-  const cartTotal = cart.reduce((total, item) => total + item.price, 0);
+  const addToCart = (product) =>
+    setCart((current) => {
+      const existingItem = current.find((item) => item.id === product.id);
+
+      if (existingItem) {
+        return current.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        );
+      }
+
+      return [...current, { ...product, quantity: 1 }];
+    });
+  const removeFromCart = (productId) =>
+    setCart((current) => current.filter((item) => item.id !== productId));
+  const updateCartQuantity = (productId, change) =>
+    setCart((current) =>
+      current
+        .map((item) =>
+          item.id === productId
+            ? { ...item, quantity: item.quantity + change }
+            : item,
+        )
+        .filter((item) => item.quantity > 0),
+    );
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartTotal = cart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0,
+  );
   const closeGallery = () => setGallery(null);
   const closeCart = () => {
     setCartOpen(false);
@@ -240,7 +269,7 @@ function App() {
             onClick={() => setCartOpen(true)}
             aria-label="Abrir carrinho"
           >
-            Sacola <span className="cart-count">{cart.length}</span>
+            Sacola <span className="cart-count">{cartItemCount}</span>
           </button>
         </div>
       </header>
@@ -527,14 +556,40 @@ function App() {
             ) : (
               <>
                 <div className="cart-items">
-                  {cart.map((item, index) => (
-                    <div className="cart-item" key={`${item.id}-${index}`}>
+                  {cart.map((item) => (
+                    <div className="cart-item" key={item.id}>
                       <img src={item.image} alt="" />
-                      <div>
+                      <div className="cart-item-info">
                         <b>{item.name}</b>
                         <span>{item.detail}</span>
+                        <div className="quantity-controls">
+                          <button
+                            onClick={() => updateCartQuantity(item.id, -1)}
+                            aria-label={`Diminuir quantidade de ${item.name}`}
+                          >
+                            −
+                          </button>
+                          <span aria-label={`Quantidade: ${item.quantity}`}>
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => updateCartQuantity(item.id, 1)}
+                            aria-label={`Aumentar quantidade de ${item.name}`}
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
-                      <strong>{formatPrice(item.price)}</strong>
+                      <strong>{formatPrice(item.price * item.quantity)}</strong>
+                      <button
+                        className="remove-cart-item"
+                        onClick={() => removeFromCart(item.id)}
+                        aria-label={`Excluir ${item.name} da sacola`}
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                        </svg>
+                      </button>
                     </div>
                   ))}
                 </div>

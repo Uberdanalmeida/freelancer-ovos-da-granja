@@ -683,25 +683,75 @@ h2 i {
   height: 54px;
   object-fit: cover;
 }
-.cart-item div {
+.cart-item-info {
   flex: 1;
+  min-width: 0;
 }
-.cart-item b,
-.cart-item span {
+.cart-item-info b,
+.cart-item-info > span {
   display: block;
 }
-.cart-item b {
+.cart-item-info b {
   font:
     16px Fraunces,
     serif;
 }
-.cart-item span {
+.cart-item-info > span {
   color: #8a9187;
   font-size: 9px;
   margin-top: 5px;
 }
 .cart-item strong {
   font-size: 11px;
+}
+.remove-cart-item {
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 6px;
+  background: transparent;
+  color: #b05d45;
+}
+.remove-cart-item svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+.remove-cart-item:hover {
+  color: #26382b;
+}
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+}
+.quantity-controls button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #c9cec4;
+  border-radius: 50%;
+  background: transparent;
+  color: #26382b;
+  font-size: 15px;
+  line-height: 1;
+}
+.quantity-controls button:hover {
+  border-color: #d06e48;
+  color: #d06e48;
+}
+.quantity-controls span {
+  min-width: 12px;
+  margin: 0;
+  color: #26382b;
+  font-size: 11px;
+  text-align: center;
 }
 .cart-total {
   display: flex;

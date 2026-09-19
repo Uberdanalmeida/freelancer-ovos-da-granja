@@ -161,7 +161,7 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
             onClick={() => onAdd(product)}
             aria-label={`Adicionar ${product.name}`}
           >
-            <span>+</span> adicionar
+            adicionar
           </button>
         </div>
       </div>
@@ -253,17 +253,11 @@ function App() {
           </span>
         </a>
         <nav className="main-nav" aria-label="Navegação principal">
-          <a href="#ovos">Nossos ovos</a>
+          <a href="#ovos">Nossos produtos</a>
           <a href="#origem">Nossa origem</a>
           <a href="#duvidas">Dúvidas</a>
         </nav>
         <div className="header-actions">
-          <button
-            className="location-button"
-            aria-label="Selecionar localização"
-          >
-            ⌖ <span>Campinas, SP</span>
-          </button>
           <button
             className="cart-button"
             onClick={() => setCartOpen(true)}
@@ -395,19 +389,51 @@ function App() {
         </a>
       </section>
       <footer className="footer">
-        <span>Todos os direitos reservados</span>
-        <span>Desenvolvido por Uberdan Almeida</span>
-        <a
-          href="https://wa.me/5519999999999"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Conversar pelo WhatsApp"
-        >
-          <svg className="whatsapp-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.6 4.1 1.6 5.8L.2 24l6.6-1.7a11.8 11.8 0 0 0 5.3 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3ZM12.2 21.4h-.1c-1.7 0-3.4-.5-4.8-1.4l-.3-.2-3.9 1 1-3.8-.2-.4a9.6 9.6 0 0 1-1.5-5.1c0-5.3 4.3-9.6 9.7-9.6 2.6 0 5 1 6.8 2.8a9.5 9.5 0 0 1 2.8 6.8c0 5.5-4.3 9.9-9.5 9.9Zm5.2-7.3c-.3-.2-1.7-.9-2-.9-.3-.1-.5-.2-.7.2-.2.3-.7.9-.8 1.1-.2.2-.3.2-.6.1-1.6-.8-2.7-1.4-3.8-3.2-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5-.1-.2-.7-1.7-.9-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1 2.9 1.1 3.1c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.4-.2-.7-.4Z" />
-          </svg>
-          WhatsApp <span>↗</span>
-        </a>
+        <div className="footer-main">
+          <div className="footer-brand">
+            <a
+              className="brand"
+              href="#inicio"
+              aria-label="Quintal da Serra início"
+            >
+              <span className="brand-mark">QS</span>
+              <span>
+                <b>quintal</b>
+                <em>da serra</em>
+              </span>
+            </a>
+            <p>O cuidado da nossa granja, fresquinho na sua mesa.</p>
+          </div>
+          <div className="footer-column">
+            <strong>Explore</strong>
+            <a href="#ovos">Nossos produtos</a>
+            <a href="#origem">Nossa origem</a>
+            <a href="#duvidas">Dúvidas</a>
+          </div>
+          <div className="footer-column footer-contact">
+            <strong>Fale com a gente</strong>
+            <a
+              href="https://wa.me/5519999999999"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Conversar pelo WhatsApp"
+            >
+              <svg
+                className="whatsapp-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.6 4.1 1.6 5.8L.2 24l6.6-1.7a11.8 11.8 0 0 0 5.3 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3ZM12.2 21.4h-.1c-1.7 0-3.4-.5-4.8-1.4l-.3-.2-3.9 1 1-3.8-.2-.4a9.6 9.6 0 0 1-1.5-5.1c0-5.3 4.3-9.6 9.7-9.6 2.6 0 5 1 6.8 2.8a9.5 9.5 0 0 1 2.8 6.8c0 5.5-4.3 9.9-9.5 9.9Zm5.2-7.3c-.3-.2-1.7-.9-2-.9-.3-.1-.5-.2-.7.2-.2.3-.7.9-.8 1.1-.2.2-.3.2-.6.1-1.6-.8-2.7-1.4-3.8-3.2-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5-.1-.2-.7-1.7-.9-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1 2.9 1.1 3.1c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.4-.2-.7-.4Z" />
+              </svg>
+              WhatsApp <span>↗</span>
+            </a>
+            <span>Atendimento de segunda a sábado</span>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>© 2026 Quintal da Serra. Todos os direitos reservados.</span>
+          <span>Desenvolvido por Uberdan Almeida</span>
+        </div>
       </footer>
       {gallery && (
         <div className="gallery-overlay" onClick={closeGallery}>

@@ -8,8 +8,9 @@ const products = [
     type: "Galinha",
     category: "galinha",
     detail: "Casca marrom",
-    price: 14.9,
-    priceQuantity: 12,
+    price: 25,
+    priceQuantity: 30,
+    formatPrices: { 1: 1, 12: 12, 30: 25 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Chicken%20eggs.jpg?width=900",
     gallery: [
@@ -24,8 +25,9 @@ const products = [
     type: "Pato",
     category: "pato",
     detail: "Extra grandes",
-    price: 22.5,
+    price: 90,
     priceQuantity: 12,
+    formatPrices: { 1: 3, 12: 36, 30: 90 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Duck%20eggs.jpg?width=900",
     gallery: [
@@ -56,8 +58,9 @@ const products = [
     type: "Ganso",
     category: "ganso",
     detail: "Selecionados",
-    price: 29.9,
-    priceQuantity: 6,
+    price: 180,
+    priceQuantity: 12,
+    formatPrices: { 1: 5, 12: 60, 30: 180 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Goose%20eggs.jpg?width=900",
     gallery: [
@@ -105,7 +108,7 @@ const paymentMethods = [
 ];
 
 const productFormats = [
-  { id: "unit", label: "Unidade", quantity: 1 },
+  { id: "unit", label: "Unidade (1 ovo)", quantity: 1 },
   { id: "dozen", label: "Dúzia", quantity: 12 },
   { id: "thirty", label: "30 ovos", quantity: 30 },
 ];
@@ -115,6 +118,12 @@ function formatPrice(price) {
 }
 
 function getFormatPrice(product, format) {
+  const formatPrice = product.formatPrices?.[format.quantity];
+
+  if (formatPrice !== undefined) {
+    return formatPrice;
+  }
+
   return Math.round(
     (product.price * format.quantity / product.priceQuantity + Number.EPSILON) *
       100,
@@ -197,7 +206,11 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
           </select>
         </label>
         <small className="product-price-note">
-          Valor proporcional à embalagem cadastrada
+          {selectedFormat.quantity === 1
+            ? "Preço individual por ovo"
+            : product.formatPrices
+              ? "Preço definido para este formato"
+              : "Valor proporcional à embalagem cadastrada"}
         </small>
         <div className="product-bottom">
           <strong>{formatPrice(selectedPrice)}</strong>

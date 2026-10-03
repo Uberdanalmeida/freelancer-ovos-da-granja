@@ -482,6 +482,32 @@ h2 i {
   color: #8b9187;
   font-size: 10px;
 }
+.product-format {
+  display: grid;
+  gap: 6px;
+  margin-top: 15px;
+  color: #687468;
+  font-size: 10px;
+}
+.product-format select {
+  width: 100%;
+  padding: 8px 9px;
+  border: 1px solid #cfd2c7;
+  border-radius: 0;
+  background: #f5f3ed;
+  color: #26382b;
+  font: inherit;
+}
+.product-format select:focus-visible {
+  outline: 2px solid #d06e48;
+  outline-offset: 2px;
+}
+.product-price-note {
+  display: block;
+  margin-top: 8px;
+  color: #8b9187;
+  font-size: 9px;
+}
 .product-bottom {
   display: flex;
   align-items: center;

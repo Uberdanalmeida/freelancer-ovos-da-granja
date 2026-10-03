@@ -7,8 +7,9 @@ const products = [
     name: "Ovos caipiras",
     type: "Galinha",
     category: "galinha",
-    detail: "Dúzia • casca marrom",
+    detail: "Casca marrom",
     price: 14.9,
+    priceQuantity: 12,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Chicken%20eggs.jpg?width=900",
     gallery: [
@@ -22,8 +23,9 @@ const products = [
     name: "Ovos de pato",
     type: "Pato",
     category: "pato",
-    detail: "Dúzia • extra grandes",
+    detail: "Extra grandes",
     price: 22.5,
+    priceQuantity: 12,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Duck%20eggs.jpg?width=900",
     gallery: [
@@ -37,8 +39,9 @@ const products = [
     name: "Ovos de codorna",
     type: "Codorna",
     category: "codorna",
-    detail: "Bandeja com 30 unidades",
+    detail: "Casca pintada",
     price: 11.9,
+    priceQuantity: 30,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Quail%20eggs.jpg?width=900",
     gallery: [
@@ -52,8 +55,9 @@ const products = [
     name: "Ovos de ganso",
     type: "Ganso",
     category: "ganso",
-    detail: "Meia dúzia • selecionados",
+    detail: "Selecionados",
     price: 29.9,
+    priceQuantity: 6,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Goose%20eggs.jpg?width=900",
     gallery: [
@@ -67,8 +71,9 @@ const products = [
     name: "Ovos de peru",
     type: "Peru",
     category: "peru",
-    detail: "Dúzia • produção artesanal",
+    detail: "Produção artesanal",
     price: 25.9,
+    priceQuantity: 12,
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Domesticated%20turkey.jpg?width=900",
     gallery: [
@@ -99,13 +104,36 @@ const paymentMethods = [
   },
 ];
 
+const productFormats = [
+  { id: "unit", label: "Unidade", quantity: 1 },
+  { id: "dozen", label: "Dúzia", quantity: 12 },
+  { id: "thirty", label: "30 ovos", quantity: 30 },
+];
+
 function formatPrice(price) {
   return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function getFormatPrice(product, format) {
+  return Math.round(
+    (product.price * format.quantity / product.priceQuantity + Number.EPSILON) *
+      100,
+  ) / 100;
+}
+
 function ProductCard({ product, onAdd, onOpenGallery }) {
   const [imageIndex, setImageIndex] = useState(0);
+  const [formatId, setFormatId] = useState(
+    () =>
+      productFormats.find(
+        (format) => format.quantity === product.priceQuantity,
+      )?.id ?? "dozen",
+  );
   const currentImage = product.gallery[imageIndex];
+  const selectedFormat = productFormats.find(
+    (format) => format.id === formatId,
+  );
+  const selectedPrice = getFormatPrice(product, selectedFormat);
 
   const changeImage = (direction) => {
     setImageIndex(
@@ -154,12 +182,29 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
         <span className="product-type">{product.type}</span>
         <h3>{product.name}</h3>
         <p>{product.detail}</p>
+        <label className="product-format">
+          Formato
+          <select
+            value={formatId}
+            onChange={(event) => setFormatId(event.target.value)}
+            aria-label={`Formato dos ${product.name.toLowerCase()}`}
+          >
+            {productFormats.map((format) => (
+              <option key={format.id} value={format.id}>
+                {format.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <small className="product-price-note">
+          Valor proporcional à embalagem cadastrada
+        </small>
         <div className="product-bottom">
-          <strong>{formatPrice(product.price)}</strong>
+          <strong>{formatPrice(selectedPrice)}</strong>
           <button
             className="add-button"
-            onClick={() => onAdd(product)}
-            aria-label={`Adicionar ${product.name}`}
+            onClick={() => onAdd(product, selectedFormat)}
+            aria-label={`Adicionar ${product.name}, formato ${selectedFormat.label}`}
           >
             adicionar
           </button>
@@ -181,27 +226,37 @@ function App() {
     activeCategory === "todos"
       ? products
       : products.filter((product) => product.category === activeCategory);
-  const addToCart = (product) =>
+  const addToCart = (product, format) =>
     setCart((current) => {
-      const existingItem = current.find((item) => item.id === product.id);
+      const cartId = `${product.id}-${format.id}`;
+      const existingItem = current.find((item) => item.cartId === cartId);
 
       if (existingItem) {
         return current.map((item) =>
-          item.id === product.id
+          item.cartId === cartId
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         );
       }
 
-      return [...current, { ...product, quantity: 1 }];
+      return [
+        ...current,
+        {
+          ...product,
+          cartId,
+          detail: `${format.label} • ${product.detail}`,
+          price: getFormatPrice(product, format),
+          quantity: 1,
+        },
+      ];
     });
-  const removeFromCart = (productId) =>
-    setCart((current) => current.filter((item) => item.id !== productId));
-  const updateCartQuantity = (productId, change) =>
+  const removeFromCart = (cartId) =>
+    setCart((current) => current.filter((item) => item.cartId !== cartId));
+  const updateCartQuantity = (cartId, change) =>
     setCart((current) =>
       current
         .map((item) =>
-          item.id === productId
+          item.cartId === cartId
             ? { ...item, quantity: item.quantity + change }
             : item,
         )
@@ -583,14 +638,14 @@ function App() {
               <>
                 <div className="cart-items">
                   {cart.map((item) => (
-                    <div className="cart-item" key={item.id}>
+                    <div className="cart-item" key={item.cartId}>
                       <img src={item.image} alt="" />
                       <div className="cart-item-info">
                         <b>{item.name}</b>
                         <span>{item.detail}</span>
                         <div className="quantity-controls">
                           <button
-                            onClick={() => updateCartQuantity(item.id, -1)}
+                            onClick={() => updateCartQuantity(item.cartId, -1)}
                             aria-label={`Diminuir quantidade de ${item.name}`}
                           >
                             −
@@ -599,7 +654,7 @@ function App() {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateCartQuantity(item.id, 1)}
+                            onClick={() => updateCartQuantity(item.cartId, 1)}
                             aria-label={`Aumentar quantidade de ${item.name}`}
                           >
                             +
@@ -609,7 +664,7 @@ function App() {
                       <strong>{formatPrice(item.price * item.quantity)}</strong>
                       <button
                         className="remove-cart-item"
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.cartId)}
                         aria-label={`Excluir ${item.name} da sacola`}
                       >
                         <svg viewBox="0 0 24 24" aria-hidden="true">

@@ -1,5 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
+
+const toplineSlides = [
+  {
+    src: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg/1920px-Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg",
+    alt: "Galinhas caipiras ciscando no gramado",
+  },
+  {
+    src: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Female_mallard_duck_on_grass_in_Hamilton_Gardens.jpg/1920px-Female_mallard_duck_on_grass_in_Hamilton_Gardens.jpg",
+    alt: "Pata caminhando pela grama",
+  },
+  {
+    src: "https://upload.wikimedia.org/wikipedia/commons/1/15/Greylag_geese_%28Anser_anser%29_-_geograph.org.uk_-_812428.jpg",
+    alt: "Gansos em área gramada",
+  },
+  {
+    src: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Rain_Quail_in_Bhigwan_August_2025_by_Tisha_Mukherjee_07.jpg/1920px-Rain_Quail_in_Bhigwan_August_2025_by_Tisha_Mukherjee_07.jpg",
+    alt: "Codorna em seu ambiente natural",
+  },
+];
 
 const products = [
   {
@@ -229,12 +248,21 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
 
 function App() {
   const [activeCategory, setActiveCategory] = useState("todos");
+  const [toplineSlide, setToplineSlide] = useState(0);
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [gallery, setGallery] = useState(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [orderPlaced, setOrderPlaced] = useState(false);
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setToplineSlide((current) => (current + 1) % toplineSlides.length);
+    }, 6000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   const visibleProducts =
     activeCategory === "todos"
       ? products
@@ -294,10 +322,15 @@ function App() {
   return (
     <main className="site-shell">
       <section className="topline" aria-label="Oferta da semana">
-        <img
-          src="https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg/1920px-Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg"
-          alt="Galinhas caipiras ciscando no gramado"
-        />
+        {toplineSlides.map((slide, index) => (
+          <img
+            key={slide.src}
+            className={`topline-image${index === toplineSlide ? " is-active" : ""}${index === 3 ? " topline-image-quail" : ""}`}
+            src={slide.src}
+            alt={index === toplineSlide ? slide.alt : ""}
+            aria-hidden={index !== toplineSlide}
+          />
+        ))}
         <div className="topline-content">
           <p>Direto da nossa granja</p>
           <strong>

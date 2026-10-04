@@ -4,7 +4,7 @@
 }
 .topline {
   position: relative;
-  height: 205px;
+  height: 320px;
   overflow: hidden;
   background: #26382b;
   color: #fff;
@@ -21,12 +21,27 @@
   content: "";
 }
 .topline img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: center 60%;
+  object-position: center 50%;
   filter: saturate(1.12) contrast(1.05);
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+.topline img.is-active {
+  opacity: 1;
+}
+.topline img.topline-image-quail {
+  object-position: center 30%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .topline img {
+    transition: none;
+  }
 }
 .topline-content {
   position: absolute;
@@ -1021,7 +1036,7 @@ h2 i {
 }
 @media (max-width: 800px) {
   .topline {
-    height: 215px;
+    height: 280px;
   }
   .topline::after {
     background: linear-gradient(

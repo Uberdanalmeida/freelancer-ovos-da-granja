@@ -14,9 +14,9 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    #26382be8 0%,
-    #26382bb8 42%,
-    #26382b33 100%
+    #26382bd9 0%,
+    #26382b91 42%,
+    #26382b0d 100%
   );
   content: "";
 }
@@ -25,8 +25,8 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: center 56%;
-  filter: saturate(0.78);
+  object-position: center 60%;
+  filter: saturate(1.12) contrast(1.05);
 }
 .topline-content {
   position: absolute;
@@ -225,14 +225,16 @@ h2 i {
   height: 480px;
   overflow: hidden;
   border-radius: 155px 155px 0 0;
-  background: #d8d5c9;
+  background: linear-gradient(135deg, #ddd5c7 0%, #f3eee5 100%);
+  box-shadow: 0 22px 52px rgba(38, 56, 43, 0.12);
 }
 .hero-image-frame img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
-  filter: saturate(0.75);
+  object-position: center 52%;
+  filter: saturate(1.12) contrast(1.08);
 }
 .hero-stamp {
   position: absolute;
@@ -629,7 +631,15 @@ h2 i {
   display: grid;
   grid-template-columns: 1.7fr 1fr 1fr;
   gap: 7vw;
+  align-items: start;
+  justify-items: center;
+  text-align: center;
   padding-bottom: 46px;
+}
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .footer-brand .brand {
   display: inline-flex;
@@ -644,7 +654,7 @@ h2 i {
 .footer-column {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 11px;
   font-size: 11px;
 }
@@ -668,17 +678,30 @@ h2 i {
 }
 .footer-bottom {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   padding-top: 20px;
   border-top: 1px solid #d8ddd0;
   color: #8a9187;
   font-size: 9px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  text-align: center;
+}
+.footer-credit {
+  color: #4f5f52;
+  font:
+    italic 700 9px/1.5 Fraunces,
+    Georgia,
+    serif;
+  letter-spacing: 0.08em;
+  opacity: 0.92;
 }
 .footer-contact a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   color: #c66543;
   font-weight: 700;

@@ -295,8 +295,8 @@ function App() {
     <main className="site-shell">
       <section className="topline" aria-label="Oferta da semana">
         <img
-          src="https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=1600&q=85"
-          alt="Ovos frescos em uma cesta"
+          src="https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg/1920px-Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg"
+          alt="Galinhas caipiras ciscando no gramado"
         />
         <div className="topline-content">
           <p>Direto da nossa granja</p>
@@ -357,19 +357,9 @@ function App() {
         <div className="hero-visual">
           <div className="hero-image-frame">
             <img
-              src="https://images.unsplash.com/photo-1587486913049-53fc88980cfc?auto=format&fit=crop&w=1400&q=90"
+              src="https://upload.wikimedia.org/wikipedia/commons/3/34/A_basket_of_fresh_eggs_%289339949261%29.jpg"
               alt="Cesta com ovos frescos"
             />
-          </div>
-          <div className="hero-stamp">
-            <span>desde</span>
-            <strong>1987</strong>
-            <span>com cuidado</span>
-          </div>
-          <div className="hero-caption">
-            OVOS DE QUINTAL
-            <br />
-            <span>colhidos toda manhã</span>
           </div>
         </div>
       </section>
@@ -500,7 +490,7 @@ function App() {
         </div>
         <div className="footer-bottom">
           <span>© 2026 Quintal da Serra. Todos os direitos reservados.</span>
-          <span>Desenvolvido por Uberdan Almeida</span>
+          <span className="footer-credit">Desenvolvido por Uberdan Almeida</span>
         </div>
       </footer>
       {gallery && (

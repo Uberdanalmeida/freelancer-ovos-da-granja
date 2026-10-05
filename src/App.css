@@ -81,6 +81,44 @@
   color: #e5e8dc;
   font-size: 13px;
 }
+.topline-dots {
+  position: absolute;
+  z-index: 2;
+  right: max(6vw, calc((100% - 1200px) / 2));
+  bottom: 18px;
+  display: flex;
+  gap: 4px;
+}
+.topline-dot {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.topline-dot::after {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 5px #26382b80;
+  content: "";
+  transition:
+    width 0.2s ease,
+    border-radius 0.2s ease,
+    background-color 0.2s ease;
+}
+.topline-dot.is-active::after {
+  width: 17px;
+  border-radius: 5px;
+  background: #f0b08f;
+}
+.topline-dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
 .header {
   max-width: 1300px;
   margin: auto;

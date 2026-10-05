@@ -340,6 +340,17 @@ function App() {
           </strong>
           <span>Ovos frescos para deixar sua mesa mais gostosa.</span>
         </div>
+        <div className="topline-dots" role="group" aria-label="Selecionar imagem do banner">
+          {toplineSlides.map((slide, index) => (
+            <button
+              key={slide.src}
+              className={`topline-dot${index === toplineSlide ? " is-active" : ""}`}
+              onClick={() => setToplineSlide(index)}
+              aria-label={`Mostrar imagem ${index + 1}: ${slide.alt}`}
+              aria-pressed={index === toplineSlide}
+            />
+          ))}
+        </div>
       </section>
       <header className="header">
         <a

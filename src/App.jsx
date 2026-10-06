@@ -63,6 +63,7 @@ const products = [
     detail: "Casca pintada",
     price: 11.9,
     priceQuantity: 30,
+    formatPrices: { 30: 11.9 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Quail%20eggs.jpg?width=900",
     gallery: [
@@ -151,14 +152,18 @@ function getFormatPrice(product, format) {
 
 function ProductCard({ product, onAdd, onOpenGallery }) {
   const [imageIndex, setImageIndex] = useState(0);
+  const availableFormats =
+    product.category === "codorna"
+      ? productFormats.filter((format) => format.quantity === 30)
+      : productFormats;
   const [formatId, setFormatId] = useState(
     () =>
-      productFormats.find(
+      availableFormats.find(
         (format) => format.quantity === product.priceQuantity,
       )?.id ?? "dozen",
   );
   const currentImage = product.gallery[imageIndex];
-  const selectedFormat = productFormats.find(
+  const selectedFormat = availableFormats.find(
     (format) => format.id === formatId,
   );
   const selectedPrice = getFormatPrice(product, selectedFormat);
@@ -217,7 +222,7 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
             onChange={(event) => setFormatId(event.target.value)}
             aria-label={`Formato dos ${product.name.toLowerCase()}`}
           >
-            {productFormats.map((format) => (
+            {availableFormats.map((format) => (
               <option key={format.id} value={format.id}>
                 {format.label}
               </option>

@@ -237,13 +237,17 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
               : "Valor proporcional à embalagem cadastrada"}
         </small>
         <div className="product-bottom">
-          <strong>{formatPrice(selectedPrice)}</strong>
+          <div className="product-price">
+            <strong>{formatPrice(selectedPrice)}</strong>
+            <span className="selected-format">{selectedFormat.label}</span>
+          </div>
           <button
             className="add-button"
             onClick={() => onAdd(product, selectedFormat)}
             aria-label={`Adicionar ${product.name}, formato ${selectedFormat.label}`}
           >
-            adicionar
+            <span>Adicionar ao carrinho</span>
+            <span aria-hidden="true">+</span>
           </button>
         </div>
       </div>

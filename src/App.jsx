@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+const STORE_WHATSAPP = "5519999999999";
+
 const toplineSlides = [
   {
     src: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg/1920px-Chickens_feeding_on_grass_in_a_breathtaking_cool_environment_in_rural_Kenya_%28Kuria_East%29.jpg",
@@ -117,8 +119,13 @@ const categories = [
 ];
 
 const paymentMethods = [
-  { id: "pix", label: "Pix", icon: "◇", description: "Aprovação imediata" },
-  { id: "card", label: "Cartão", icon: "▣", description: "Crédito ou débito" },
+  { id: "pix", label: "Pix", icon: "◇", description: "Pix na entrega" },
+  {
+    id: "card",
+    label: "Cartão",
+    icon: "▣",
+    description: "Crédito ou débito na entrega",
+  },
   {
     id: "cash",
     label: "Dinheiro",
@@ -263,7 +270,7 @@ function App() {
   const [gallery, setGallery] = useState(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("pix");
-  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [cashChange, setCashChange] = useState("");
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setToplineSlide((current) => (current + 1) % toplineSlides.length);
@@ -317,15 +324,29 @@ function App() {
     (total, item) => total + item.price * item.quantity,
     0,
   );
+  const selectedPaymentMethod = paymentMethods.find(
+    (method) => method.id === paymentMethod,
+  );
+  const orderMessage = [
+    "Olá! Gostaria de fazer este pedido:",
+    "",
+    ...cart.map(
+      (item) =>
+        `• ${item.name} (${item.detail}) — ${item.quantity} x ${formatPrice(item.price)} = ${formatPrice(item.price * item.quantity)}`,
+    ),
+    "",
+    `Total: ${formatPrice(cartTotal)}`,
+    `Forma de pagamento: ${selectedPaymentMethod.label}`,
+    "O pagamento será realizado na entrega.",
+    ...(paymentMethod === "cash" && cashChange.trim()
+      ? [`Troco para: ${cashChange.trim()}`]
+      : []),
+  ].join("\n");
+  const whatsappOrderUrl = `https://wa.me/${STORE_WHATSAPP}?text=${encodeURIComponent(orderMessage)}`;
   const closeGallery = () => setGallery(null);
   const closeCart = () => {
     setCartOpen(false);
     setCheckoutOpen(false);
-    setOrderPlaced(false);
-  };
-  const placeOrder = () => {
-    setOrderPlaced(true);
-    setCart([]);
   };
 
   return (
@@ -524,7 +545,7 @@ function App() {
           <div className="footer-column footer-contact">
             <strong>Fale com a gente</strong>
             <a
-              href="https://wa.me/5519999999999"
+              href={`https://wa.me/${STORE_WHATSAPP}`}
               target="_blank"
               rel="noreferrer"
               aria-label="Conversar pelo WhatsApp"
@@ -593,19 +614,11 @@ function App() {
                 ×
               </button>
             </div>
-            {orderPlaced ? (
-              <div className="order-success">
-                <span>✓</span>
-                <h3>Pedido recebido!</h3>
-                <p>Vamos preparar tudo com carinho para você.</p>
-                <button className="checkout-button" onClick={closeCart}>
-                  Voltar para a loja <span>↗</span>
-                </button>
-              </div>
-            ) : checkoutOpen ? (
+            {checkoutOpen ? (
               <div className="checkout-content">
                 <p className="checkout-intro">
-                  Escolha como você prefere pagar o seu pedido.
+                  Escolha como prefere pagar na entrega. O WhatsApp abrirá com
+                  o resumo para você enviar à granja.
                 </p>
                 <div
                   className="payment-options"
@@ -629,41 +642,15 @@ function App() {
                     </button>
                   ))}
                 </div>
-                {paymentMethod === "pix" && (
-                  <div className="payment-detail">
-                    <b>Você receberá o código Pix após confirmar.</b>
-                    <span>O pagamento será aprovado em poucos segundos.</span>
-                  </div>
-                )}
-                {paymentMethod === "card" && (
-                  <div className="payment-fields">
-                    <label>
-                      Número do cartão
-                      <input
-                        placeholder="0000 0000 0000 0000"
-                        inputMode="numeric"
-                      />
-                    </label>
-                    <label>
-                      Nome impresso
-                      <input placeholder="Como está no cartão" />
-                    </label>
-                    <div className="payment-field-row">
-                      <label>
-                        Validade
-                        <input placeholder="MM/AA" />
-                      </label>
-                      <label>
-                        CVV
-                        <input placeholder="123" inputMode="numeric" />
-                      </label>
-                    </div>
-                  </div>
-                )}
                 {paymentMethod === "cash" && (
                   <label className="change-field">
                     Troco para quanto?
-                    <input placeholder="Ex.: R$ 50,00" inputMode="decimal" />
+                    <input
+                      placeholder="Ex.: R$ 50,00"
+                      inputMode="decimal"
+                      value={cashChange}
+                      onChange={(event) => setCashChange(event.target.value)}
+                    />
                     <small>Deixe em branco se não precisar de troco.</small>
                   </label>
                 )}
@@ -671,9 +658,14 @@ function App() {
                   <span>Total do pedido</span>
                   <strong>{formatPrice(cartTotal)}</strong>
                 </div>
-                <button className="checkout-button" onClick={placeOrder}>
-                  Confirmar pedido <span>↗</span>
-                </button>
+                <a
+                  className="checkout-button"
+                  href={whatsappOrderUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Enviar pedido pelo WhatsApp <span>↗</span>
+                </a>
                 <button
                   className="back-to-cart"
                   onClick={() => setCheckoutOpen(false)}

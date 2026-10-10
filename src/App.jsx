@@ -344,6 +344,37 @@ function App() {
   ].join("\n");
   const whatsappOrderUrl = `https://wa.me/${STORE_WHATSAPP}?text=${encodeURIComponent(orderMessage)}`;
   const closeGallery = () => setGallery(null);
+  const changeGalleryImage = (direction) => {
+    setGallery((current) => {
+      if (!current) return current;
+
+      const totalImages = current.product.gallery.length;
+      return {
+        ...current,
+        imageIndex: (current.imageIndex + direction + totalImages) % totalImages,
+      };
+    });
+  };
+  useEffect(() => {
+    if (!gallery) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        changeGalleryImage(-1);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        changeGalleryImage(1);
+      }
+      if (event.key === "Escape") {
+        closeGallery();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [gallery]);
   const closeCart = () => {
     setCartOpen(false);
     setCheckoutOpen(false);
@@ -583,13 +614,46 @@ function App() {
             >
               ×
             </button>
-            <img
-              src={gallery.product.gallery[gallery.imageIndex]}
-              alt={`Imagem ampliada de ${gallery.product.name}`}
-              onError={(event) => {
-                event.currentTarget.src = gallery.product.image;
-              }}
-            />
+            <div className="gallery-image-shell">
+              <button
+                className="gallery-nav gallery-nav-left"
+                onClick={() => changeGalleryImage(-1)}
+                aria-label={`Imagem anterior de ${gallery.product.name}`}
+              >
+                ‹
+              </button>
+              <img
+                src={gallery.product.gallery[gallery.imageIndex]}
+                alt={`Imagem ampliada de ${gallery.product.name}`}
+                onError={(event) => {
+                  event.currentTarget.src = gallery.product.image;
+                }}
+              />
+              <button
+                className="gallery-nav gallery-nav-right"
+                onClick={() => changeGalleryImage(1)}
+                aria-label={`Próxima imagem de ${gallery.product.name}`}
+              >
+                ›
+              </button>
+            </div>
+            <div className="gallery-thumbs" role="group" aria-label="Seleção de imagens">
+              {gallery.product.gallery.map((image, index) => (
+                <button
+                  key={`${gallery.product.id}-${index}`}
+                  className={`gallery-thumb${index === gallery.imageIndex ? " is-active" : ""}`}
+                  onClick={() =>
+                    setGallery((current) =>
+                      current ? { ...current, imageIndex: index } : current,
+                    )
+                  }
+                  aria-label={`Mostrar imagem ${index + 1} de ${gallery.product.name}`}
+                  aria-pressed={index === gallery.imageIndex}
+                >
+                  <img src={image} alt={`Miniatura ${index + 1} de ${gallery.product.name}`} />
+                </button>
+              ))}
+            </div>
             <div className="gallery-modal-footer">
               <div>
                 <span>{gallery.product.type}</span>

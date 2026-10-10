@@ -453,7 +453,7 @@ function App() {
             para viver bem.
           </p>
           <a href="#ovos" className="primary-button">
-            Escolher meus ovos <span>↘</span>
+            Escolher ovos <span>↘</span>
           </a>
           <div className="hero-note">
             <span className="note-line" /> Mais sabor em cada manhã

@@ -598,10 +598,19 @@ h2 i {
   font-size: 12px;
   font-weight: 600;
   text-align: left;
-  transition: background 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 .add-button:hover {
   background: #b95b38;
+}
+.add-button.is-added,
+.add-button.is-added:hover {
+  background: #536a4d;
+}
+.add-button.is-added {
+  transform: scale(0.98);
 }
 .add-button:focus-visible {
   outline: 2px solid #26382b;

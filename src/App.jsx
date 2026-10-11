@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 const STORE_WHATSAPP = "5519999999999";
@@ -159,6 +159,8 @@ function getFormatPrice(product, format) {
 
 function ProductCard({ product, onAdd, onOpenGallery }) {
   const [imageIndex, setImageIndex] = useState(0);
+  const [added, setAdded] = useState(false);
+  const addedTimeoutRef = useRef(null);
   const availableFormats =
     product.category === "codorna"
       ? productFormats.filter((format) => format.quantity === 30)
@@ -174,6 +176,29 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
     (format) => format.id === formatId,
   );
   const selectedPrice = getFormatPrice(product, selectedFormat);
+
+  useEffect(
+    () => () => {
+      if (addedTimeoutRef.current !== null) {
+        window.clearTimeout(addedTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
+  const handleAdd = () => {
+    onAdd(product, selectedFormat);
+    setAdded(true);
+
+    if (addedTimeoutRef.current !== null) {
+      window.clearTimeout(addedTimeoutRef.current);
+    }
+
+    addedTimeoutRef.current = window.setTimeout(() => {
+      setAdded(false);
+      addedTimeoutRef.current = null;
+    }, 1800);
+  };
 
   const changeImage = (direction) => {
     setImageIndex(
@@ -226,7 +251,10 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
           Formato
           <select
             value={formatId}
-            onChange={(event) => setFormatId(event.target.value)}
+            onChange={(event) => {
+              setFormatId(event.target.value);
+              setAdded(false);
+            }}
             aria-label={`Formato dos ${product.name.toLowerCase()}`}
           >
             {availableFormats.map((format) => (
@@ -249,12 +277,18 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
             <span className="selected-format">{selectedFormat.label}</span>
           </div>
           <button
-            className="add-button"
-            onClick={() => onAdd(product, selectedFormat)}
-            aria-label={`Adicionar ${product.name}, formato ${selectedFormat.label}`}
+            className={`add-button${added ? " is-added" : ""}`}
+            onClick={handleAdd}
+            aria-label={
+              added
+                ? `${product.name}, formato ${selectedFormat.label} adicionado ao carrinho`
+                : `Adicionar ${product.name}, formato ${selectedFormat.label}`
+            }
           >
-            <span>Adicionar ao carrinho</span>
-            <span aria-hidden="true">+</span>
+            <span aria-live="polite">
+              {added ? "Adicionado ao carrinho!" : "Adicionar ao carrinho"}
+            </span>
+            <span aria-hidden="true">{added ? "✓" : "+"}</span>
           </button>
         </div>
       </div>

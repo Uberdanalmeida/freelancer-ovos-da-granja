@@ -42,13 +42,13 @@ const products = [
   },
   {
     id: 2,
-    name: "Ovos de pato",
+    name: "Ovos de pata",
     type: "Pato",
     category: "pato",
     detail: "Extra grandes",
     price: 90,
     priceQuantity: 12,
-    formatPrices: { 1: 3, 12: 36, 30: 90 },
+    formatPrices: { 1: 3.5, 12: 42, 30: 105 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Duck%20eggs.jpg?width=900",
     gallery: [
@@ -76,13 +76,13 @@ const products = [
   },
   {
     id: 4,
-    name: "Ovos de ganso",
+    name: "Ovos de gansa",
     type: "Ganso",
     category: "ganso",
     detail: "Selecionados",
     price: 180,
     priceQuantity: 12,
-    formatPrices: { 1: 5, 12: 60, 30: 180 },
+    formatPrices: { 1: 5, 12: 60, 30: 150 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Goose%20eggs.jpg?width=900",
     gallery: [

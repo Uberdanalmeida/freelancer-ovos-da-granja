@@ -29,9 +29,9 @@ const products = [
     type: "Galinha",
     category: "galinha",
     detail: "Casca marrom",
-    price: 25,
+    price: 30,
     priceQuantity: 30,
-    formatPrices: { 1: 1, 12: 12, 30: 25 },
+    formatPrices: { 1: 1, 12: 12, 30: 30 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Chicken%20eggs.jpg?width=900",
     gallery: [

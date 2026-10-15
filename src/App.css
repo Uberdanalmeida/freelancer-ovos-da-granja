@@ -841,19 +841,22 @@ h2 i {
   padding-top: 20px;
   border-top: 1px solid #d8ddd0;
   color: #8a9187;
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.02em;
   text-align: center;
 }
+.footer-copyright {
+  color: #7b857a;
+  font-size: 11px;
+  font-weight: 400;
+}
 .footer-credit {
-  color: #4f5f52;
+  color: #c66543;
   font:
-    italic 700 9px/1.5 Fraunces,
+    italic 600 12px/1.5 Fraunces,
     Georgia,
     serif;
-  letter-spacing: 0.08em;
-  opacity: 0.92;
+  letter-spacing: 0.02em;
 }
 .footer-contact a {
   display: inline-flex;

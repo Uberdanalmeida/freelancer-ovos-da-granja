@@ -628,7 +628,9 @@ function App() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 Quintal da Serra. Todos os direitos reservados.</span>
+          <span className="footer-copyright">
+            © 2026 Quintal da Serra. Todos os direitos reservados.
+          </span>
           <span className="footer-credit">Desenvolvido por Uberdan Almeida</span>
         </div>
       </footer>

@@ -1235,6 +1235,15 @@ h2 i {
   .product-info h3 {
     font-size: 17px;
   }
+  .add-button {
+    justify-content: center;
+  }
+  .add-button span:first-child {
+    text-align: center;
+  }
+  .add-button span:last-child {
+    display: none;
+  }
   .story-banner {
     display: block;
     padding: 65px 9vw;

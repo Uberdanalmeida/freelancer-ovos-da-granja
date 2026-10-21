@@ -139,32 +139,50 @@ const productFormats = [
   { id: "dozen", label: "Dúzia", quantity: 12 },
   { id: "thirty", label: "30 ovos", quantity: 30 },
 ];
+const customFormat = {
+  id: "custom",
+  label: "Quantidade personalizada",
+  quantity: null,
+};
 
 function formatPrice(price) {
   return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function formatCustomQuantityLabel(quantity) {
+  const safeQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
+  return `${safeQuantity} ${safeQuantity === 1 ? "ovo" : "ovos"}`;
+}
+
+function getUnitPrice(product) {
+  return product.formatPrices?.[1] ?? product.price / product.priceQuantity;
+}
+
 function getFormatPrice(product, format) {
+  if (!format || !format.quantity) {
+    return 0;
+  }
+
   const formatPrice = product.formatPrices?.[format.quantity];
 
   if (formatPrice !== undefined) {
     return formatPrice;
   }
 
-  return Math.round(
-    (product.price * format.quantity / product.priceQuantity + Number.EPSILON) *
-      100,
-  ) / 100;
+  const unitPrice = getUnitPrice(product);
+
+  return Math.round((unitPrice * format.quantity + Number.EPSILON) * 100) / 100;
 }
 
 function ProductCard({ product, onAdd, onOpenGallery }) {
   const [imageIndex, setImageIndex] = useState(0);
   const [added, setAdded] = useState(false);
+  const [customQuantity, setCustomQuantity] = useState("");
   const addedTimeoutRef = useRef(null);
   const availableFormats =
     product.category === "codorna"
       ? productFormats.filter((format) => format.quantity === 30)
-      : productFormats;
+      : [...productFormats, customFormat];
   const [formatId, setFormatId] = useState(
     () =>
       availableFormats.find(
@@ -172,9 +190,14 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
       )?.id ?? "dozen",
   );
   const currentImage = product.gallery[imageIndex];
-  const selectedFormat = availableFormats.find(
-    (format) => format.id === formatId,
-  );
+  const selectedFormat =
+    formatId === customFormat.id
+      ? {
+          ...customFormat,
+          quantity: Number(customQuantity) > 0 ? Number(customQuantity) : 1,
+          label: `Quantidade personalizada (${formatCustomQuantityLabel(customQuantity)})`,
+        }
+      : availableFormats.find((format) => format.id === formatId) ?? productFormats[0];
   const selectedPrice = getFormatPrice(product, selectedFormat);
 
   useEffect(
@@ -187,7 +210,24 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
   );
 
   const handleAdd = () => {
-    onAdd(product, selectedFormat);
+    const normalizedQuantity =
+      formatId === customFormat.id
+        ? Number(customQuantity)
+        : selectedFormat.quantity;
+
+    const finalizedFormat =
+      formatId === customFormat.id
+        ? {
+            ...customFormat,
+            quantity:
+              Number.isFinite(normalizedQuantity) && normalizedQuantity > 0
+                ? normalizedQuantity
+                : 1,
+            label: `Quantidade personalizada (${formatCustomQuantityLabel(normalizedQuantity)})`,
+          }
+        : selectedFormat;
+
+    onAdd(product, finalizedFormat);
     setAdded(true);
 
     if (addedTimeoutRef.current !== null) {
@@ -264,6 +304,25 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
             ))}
           </select>
         </label>
+        {formatId === customFormat.id && (
+          <label className="product-custom-quantity">
+            Quantidade desejada
+            <input
+              type="number"
+              min="1"
+              step="1"
+              inputMode="numeric"
+              value={customQuantity}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                setCustomQuantity(nextValue);
+                setAdded(false);
+              }}
+              placeholder="Ex: 7"
+              aria-label={`Quantidade personalizada para ${product.name}`}
+            />
+          </label>
+        )}
         <small className="product-price-note">
           {selectedFormat.quantity === 1
             ? "Preço individual por ovo"
@@ -271,6 +330,7 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
               ? "Preço definido para este formato"
               : "Valor proporcional à embalagem cadastrada"}
         </small>
+
         <div className="product-bottom">
           <div className="product-price">
             <strong>{formatPrice(selectedPrice)}</strong>
@@ -318,41 +378,50 @@ function App() {
       ? products
       : products.filter((product) => product.category === activeCategory);
   const addToCart = (product, format) =>
-    setCart((current) => {
-      const cartId = `${product.id}-${format.id}`;
-      const existingItem = current.find((item) => item.cartId === cartId);
+  setCart((current) => {
+    const cartId =
+      format.id === customFormat.id
+        ? `${product.id}-${customFormat.id}-${format.quantity}`
+        : `${product.id}-${format.id}`;
+    const existingItem = current.find((item) => item.cartId === cartId);
+    const incrementValue = format.id === customFormat.id ? format.quantity : 1;
 
-      if (existingItem) {
-        return current.map((item) =>
-          item.cartId === cartId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
-      }
+    if (existingItem) {
+      return current.map((item) =>
+        item.cartId === cartId
+          ? { ...item, quantity: item.quantity + incrementValue }
+          : item,
+      );
+    }
 
-      return [
-        ...current,
-        {
-          ...product,
-          cartId,
-          detail: `${format.label} • ${product.detail}`,
-          price: getFormatPrice(product, format),
-          quantity: 1,
-        },
-      ];
-    });
+    return [
+      ...current,
+      {
+        ...product,
+        cartId,
+        detail: `${format.label} • ${product.detail}`,
+        price: getFormatPrice(product, format),
+        quantity: incrementValue,
+        stepQuantity: incrementValue,
+      },
+    ];
+  });
   const removeFromCart = (cartId) =>
-    setCart((current) => current.filter((item) => item.cartId !== cartId));
+  setCart((current) => current.filter((item) => item.cartId !== cartId));
   const updateCartQuantity = (cartId, change) =>
-    setCart((current) =>
-      current
-        .map((item) =>
-          item.cartId === cartId
-            ? { ...item, quantity: item.quantity + change }
-            : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
+  setCart((current) =>
+    current
+      .map((item) => {
+        if (item.cartId !== cartId) {
+          return item;
+        }
+
+        const stepQuantity = item.stepQuantity ?? 1;
+        const nextQuantity = item.quantity + change * stepQuantity;
+        return { ...item, quantity: nextQuantity };
+      })
+      .filter((item) => item.quantity > 0),
+  );
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce(
     (total, item) => total + item.price * item.quantity,

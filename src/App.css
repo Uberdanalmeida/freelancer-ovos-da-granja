@@ -557,6 +557,32 @@ h2 i {
   outline: 2px solid #d06e48;
   outline-offset: 2px;
 }
+.product-custom-quantity {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 11px;
+  border: 1px solid #d9b49f;
+  background: #f3eee4;
+  color: #26382b;
+  font-size: 11px;
+  font-weight: 600;
+}
+.product-custom-quantity input {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid #cfd2c7;
+  background: #f5f3ed;
+  color: #26382b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+.product-custom-quantity input:focus-visible {
+  outline: 2px solid #d06e48;
+  outline-offset: 2px;
+}
 .product-price-note {
   display: block;
   margin-top: 8px;

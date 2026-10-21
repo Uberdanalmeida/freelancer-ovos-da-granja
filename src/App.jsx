@@ -139,19 +139,65 @@ const productFormats = [
   { id: "dozen", label: "Dúzia", quantity: 12 },
   { id: "thirty", label: "30 ovos", quantity: 30 },
 ];
-const customFormat = {
-  id: "custom",
-  label: "Quantidade personalizada",
-  quantity: null,
-};
+
+const CART_STORAGE_KEY = "freelancer-granja-cart";
+
+function getCartItemId(product, format) {
+  return `${product.id}-${format.id}`;
+}
+
+function getStoredCart() {
+  try {
+    const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (storedCart === null) {
+      return [];
+    }
+
+    const cart = JSON.parse(storedCart);
+    if (
+      !Array.isArray(cart) ||
+      !cart.every(
+        (item) =>
+          item &&
+          typeof item.cartId === "string" &&
+          typeof item.name === "string" &&
+          typeof item.detail === "string" &&
+          Number.isFinite(item.price) &&
+          Number.isFinite(item.quantity) &&
+          item.quantity > 0,
+      )
+    ) {
+      throw new Error("O carrinho salvo possui um formato inválido.");
+    }
+
+    return cart.map((item) => {
+      if (!/^\d+-custom-\d+$/.test(item.cartId)) {
+        return item;
+      }
+
+      const quantityPerAdd = item.stepQuantity ?? 1;
+      if (!Number.isFinite(quantityPerAdd) || quantityPerAdd <= 0) {
+        throw new Error("O carrinho salvo possui uma quantidade inválida.");
+      }
+
+      return {
+        ...item,
+        detail: item.detail.replace(
+          /^Quantidade personalizada \([^)]*\)/,
+          "Unidade (1 ovo)",
+        ),
+        price: item.price / quantityPerAdd,
+        stepQuantity: 1,
+      };
+    });
+  } catch (error) {
+    console.error("Não foi possível carregar o carrinho salvo.", error);
+    return [];
+  }
+}
 
 function formatPrice(price) {
   return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function formatCustomQuantityLabel(quantity) {
-  const safeQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
-  return `${safeQuantity} ${safeQuantity === 1 ? "ovo" : "ovos"}`;
 }
 
 function getUnitPrice(product) {
@@ -174,15 +220,14 @@ function getFormatPrice(product, format) {
   return Math.round((unitPrice * format.quantity + Number.EPSILON) * 100) / 100;
 }
 
-function ProductCard({ product, onAdd, onOpenGallery }) {
+function ProductCard({ product, cart, onAdd, onOpenGallery }) {
   const [imageIndex, setImageIndex] = useState(0);
-  const [added, setAdded] = useState(false);
-  const [customQuantity, setCustomQuantity] = useState("");
+  const [addedCartId, setAddedCartId] = useState(null);
   const addedTimeoutRef = useRef(null);
   const availableFormats =
     product.category === "codorna"
       ? productFormats.filter((format) => format.quantity === 30)
-      : [...productFormats, customFormat];
+      : productFormats;
   const [formatId, setFormatId] = useState(
     () =>
       availableFormats.find(
@@ -191,14 +236,11 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
   );
   const currentImage = product.gallery[imageIndex];
   const selectedFormat =
-    formatId === customFormat.id
-      ? {
-          ...customFormat,
-          quantity: Number(customQuantity) > 0 ? Number(customQuantity) : 1,
-          label: `Quantidade personalizada (${formatCustomQuantityLabel(customQuantity)})`,
-        }
-      : availableFormats.find((format) => format.id === formatId) ?? productFormats[0];
+    availableFormats.find((format) => format.id === formatId) ?? productFormats[0];
   const selectedPrice = getFormatPrice(product, selectedFormat);
+  const selectedCartId = getCartItemId(product, selectedFormat);
+  const isInCart = cart.some((item) => item.cartId === selectedCartId);
+  const wasJustAdded = addedCartId === selectedCartId;
 
   useEffect(
     () => () => {
@@ -210,32 +252,16 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
   );
 
   const handleAdd = () => {
-    const normalizedQuantity =
-      formatId === customFormat.id
-        ? Number(customQuantity)
-        : selectedFormat.quantity;
-
-    const finalizedFormat =
-      formatId === customFormat.id
-        ? {
-            ...customFormat,
-            quantity:
-              Number.isFinite(normalizedQuantity) && normalizedQuantity > 0
-                ? normalizedQuantity
-                : 1,
-            label: `Quantidade personalizada (${formatCustomQuantityLabel(normalizedQuantity)})`,
-          }
-        : selectedFormat;
-
-    onAdd(product, finalizedFormat);
-    setAdded(true);
+    onAdd(product, selectedFormat);
+    const cartId = getCartItemId(product, selectedFormat);
+    setAddedCartId(cartId);
 
     if (addedTimeoutRef.current !== null) {
       window.clearTimeout(addedTimeoutRef.current);
     }
 
     addedTimeoutRef.current = window.setTimeout(() => {
-      setAdded(false);
+      setAddedCartId(null);
       addedTimeoutRef.current = null;
     }, 1800);
   };
@@ -293,7 +319,7 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
             value={formatId}
             onChange={(event) => {
               setFormatId(event.target.value);
-              setAdded(false);
+              setAddedCartId(null);
             }}
             aria-label={`Formato dos ${product.name.toLowerCase()}`}
           >
@@ -304,25 +330,6 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
             ))}
           </select>
         </label>
-        {formatId === customFormat.id && (
-          <label className="product-custom-quantity">
-            Quantidade desejada
-            <input
-              type="number"
-              min="1"
-              step="1"
-              inputMode="numeric"
-              value={customQuantity}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                setCustomQuantity(nextValue);
-                setAdded(false);
-              }}
-              placeholder="Ex: 7"
-              aria-label={`Quantidade personalizada para ${product.name}`}
-            />
-          </label>
-        )}
         <small className="product-price-note">
           {selectedFormat.quantity === 1
             ? "Preço individual por ovo"
@@ -337,18 +344,24 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
             <span className="selected-format">{selectedFormat.label}</span>
           </div>
           <button
-            className={`add-button${added ? " is-added" : ""}`}
+            className={`add-button${wasJustAdded ? " is-added" : ""}`}
             onClick={handleAdd}
             aria-label={
-              added
+              wasJustAdded
                 ? `${product.name}, formato ${selectedFormat.label} adicionado ao carrinho`
+                : isInCart
+                  ? `${product.name}, formato ${selectedFormat.label} no carrinho`
                 : `Adicionar ${product.name}, formato ${selectedFormat.label}`
             }
           >
             <span aria-live="polite">
-              {added ? "Adicionado ao carrinho!" : "Adicionar ao carrinho"}
+              {wasJustAdded
+                ? "Adicionado ao carrinho!"
+                : isInCart
+                  ? "No carrinho"
+                  : "Adicionar ao carrinho"}
             </span>
-            <span aria-hidden="true">{added ? "✓" : "+"}</span>
+            <span aria-hidden="true">{wasJustAdded || isInCart ? "✓" : "+"}</span>
           </button>
         </div>
       </div>
@@ -359,12 +372,20 @@ function ProductCard({ product, onAdd, onOpenGallery }) {
 function App() {
   const [activeCategory, setActiveCategory] = useState("todos");
   const [toplineSlide, setToplineSlide] = useState(0);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(getStoredCart);
   const [cartOpen, setCartOpen] = useState(false);
   const [gallery, setGallery] = useState(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [cashChange, setCashChange] = useState("");
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch (error) {
+      console.error("Não foi possível salvar o carrinho.", error);
+    }
+  }, [cart]);
+
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setToplineSlide((current) => (current + 1) % toplineSlides.length);
@@ -379,12 +400,9 @@ function App() {
       : products.filter((product) => product.category === activeCategory);
   const addToCart = (product, format) =>
   setCart((current) => {
-    const cartId =
-      format.id === customFormat.id
-        ? `${product.id}-${customFormat.id}-${format.quantity}`
-        : `${product.id}-${format.id}`;
+    const cartId = getCartItemId(product, format);
     const existingItem = current.find((item) => item.cartId === cartId);
-    const incrementValue = format.id === customFormat.id ? format.quantity : 1;
+    const incrementValue = 1;
 
     if (existingItem) {
       return current.map((item) =>
@@ -628,6 +646,7 @@ function App() {
             <ProductCard
               key={product.id}
               product={product}
+              cart={cart}
               onAdd={addToCart}
               onOpenGallery={(selectedProduct, imageIndex) =>
                 setGallery({ product: selectedProduct, imageIndex })

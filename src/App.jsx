@@ -557,7 +557,21 @@ function App() {
             onClick={() => setCartOpen(true)}
             aria-label="Abrir carrinho"
           >
-            Sacola <span className="cart-count">{cartItemCount}</span>
+            <svg
+              className="cart-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 9H6" />
+              <circle cx="10" cy="20" r="1" />
+              <circle cx="18" cy="20" r="1" />
+            </svg>
+            <span className="cart-count">{cartItemCount}</span>
           </button>
         </div>
       </header>

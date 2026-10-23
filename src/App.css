@@ -182,18 +182,37 @@
 }
 .cart-button {
   color: #26382b;
-  font-weight: 600;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.cart-button:hover {
+  background: #f3f1e9;
+}
+.cart-icon {
+  width: 24px;
+  height: 24px;
 }
 .cart-count {
-  display: inline-grid;
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
   place-items: center;
-  width: 19px;
-  height: 19px;
-  margin-left: 7px;
-  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 2px solid #fffdf8;
+  border-radius: 999px;
   background: #d9895c;
   color: white;
-  font-size: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 .hero {
   max-width: 1200px;

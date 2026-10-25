@@ -1107,9 +1107,48 @@ h2 i {
   text-align: center;
 }
 .pix-qr-image {
-  width: 200px;
-  height: 200px;
+  width: 280px;
+  max-width: 100%;
+  height: auto;
   image-rendering: pixelated;
+}
+.pix-qr-instructions {
+  max-width: 280px;
+  line-height: 1.5;
+}
+.pix-copy-button {
+  padding: 10px 14px;
+  border: 0;
+  background: #536a4d;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pix-copy-button:hover {
+  background: #40533b;
+}
+.pix-code-details {
+  width: 100%;
+  color: #687468;
+  font-size: 11px;
+  text-align: left;
+}
+.pix-code-details summary {
+  cursor: pointer;
+}
+.pix-code-details textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 70px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid #dedfd5;
+  background: #fff;
+  color: #26382b;
+  font: 10px/1.4 monospace;
+  overflow-wrap: anywhere;
+  resize: vertical;
 }
 .pix-qr-status {
   margin: 0;

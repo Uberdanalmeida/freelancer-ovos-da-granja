@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import "./App.css";
 
 const STORE_WHATSAPP = "5519999999999";
-const PIX_KEY = "11986716561";
+const PIX_KEY = "+5511986716561";
 const PIX_RECEIVER = "UBERDAN ALMEIDA";
 const PIX_CITY = "SAO PAULO";
 
@@ -155,6 +155,7 @@ function buildPixPayload(amount) {
     pixField("00", "BR.GOV.BCB.PIX") + pixField("01", PIX_KEY);
   const payload = [
     pixField("00", "01"),
+    pixField("01", "11"),
     pixField("26", merchantAccount),
     pixField("52", "0000"),
     pixField("53", "986"),
@@ -179,11 +180,12 @@ function buildPixPayload(amount) {
 
 function PixQrCode({ payload }) {
   const [result, setResult] = useState(null);
+  const [copyStatus, setCopyStatus] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
-    QRCode.toDataURL(payload, { errorCorrectionLevel: "M", margin: 2, width: 240 })
+    QRCode.toDataURL(payload, { errorCorrectionLevel: "M", margin: 4, width: 280 })
       .then((dataUrl) => {
         if (!cancelled) {
           setResult({ payload, dataUrl });
@@ -213,7 +215,40 @@ function PixQrCode({ payload }) {
     );
   }
 
-  return <img className="pix-qr-image" src={result.dataUrl} alt="QR Code para pagamento Pix" />;
+  const copyPixCode = async () => {
+    try {
+      if (!navigator.clipboard) {
+        throw new Error("A área de transferência não está disponível.");
+      }
+      await navigator.clipboard.writeText(payload);
+      setCopyStatus("Código copiado. Cole em Pix > Pix Copia e Cola no app do banco.");
+    } catch (error) {
+      console.error("Não foi possível copiar o código Pix.", error);
+      setCopyStatus("Não foi possível copiar. Abra “Mostrar código Pix” para copiá-lo manualmente.");
+    }
+  };
+
+  return (
+    <>
+      <img className="pix-qr-image" src={result.dataUrl} alt="QR Code para pagamento Pix" />
+      <p className="pix-qr-instructions">
+        Para pagar, abra o app do banco e escolha Pix &gt; Pagar com QR Code.
+        A câmera comum do celular pode não reconhecer pagamentos Pix.
+      </p>
+      <button className="pix-copy-button" type="button" onClick={copyPixCode}>
+        Copiar Pix copia e cola
+      </button>
+      {copyStatus && (
+        <p className="pix-qr-status" role="status">
+          {copyStatus}
+        </p>
+      )}
+      <details className="pix-code-details">
+        <summary>Mostrar código Pix</summary>
+        <textarea aria-label="Código Pix copia e cola" readOnly value={payload} />
+      </details>
+    </>
+  );
 }
 
 function getCartItemId(product, format) {
@@ -923,7 +958,7 @@ function App() {
                 {paymentMethod === "pix" && (
                   <div className="pix-payment">
                     <PixQrCode payload={buildPixPayload(cartTotal)} />
-                    <p>Escaneie o QR Code ou use a chave Pix:</p>
+                    <p>Chave Pix para pagamento manual:</p>
                     <strong className="pix-key">{PIX_KEY}</strong>
                     <small>
                       Recebedor: {PIX_RECEIVER} · {PIX_CITY}

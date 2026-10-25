@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import QRCode from "qrcode";
 import "./App.css";
 
 const STORE_WHATSAPP = "5519999999999";
+const PIX_KEY = "11986716561";
+const PIX_RECEIVER = "UBERDAN ALMEIDA";
+const PIX_CITY = "SAO PAULO";
 
 const toplineSlides = [
   {
@@ -119,7 +123,7 @@ const categories = [
 ];
 
 const paymentMethods = [
-  { id: "pix", label: "Pix", icon: "◇", description: "Pix na entrega" },
+  { id: "pix", label: "Pix", icon: "◇", description: "Pague pelo QR Code" },
   {
     id: "card",
     label: "Cartão",
@@ -141,6 +145,76 @@ const productFormats = [
 ];
 
 const CART_STORAGE_KEY = "freelancer-granja-cart";
+
+function pixField(id, value) {
+  return `${id}${String(value.length).padStart(2, "0")}${value}`;
+}
+
+function buildPixPayload(amount) {
+  const merchantAccount =
+    pixField("00", "BR.GOV.BCB.PIX") + pixField("01", PIX_KEY);
+  const payload = [
+    pixField("00", "01"),
+    pixField("26", merchantAccount),
+    pixField("52", "0000"),
+    pixField("53", "986"),
+    pixField("54", amount.toFixed(2)),
+    pixField("58", "BR"),
+    pixField("59", PIX_RECEIVER),
+    pixField("60", PIX_CITY),
+    pixField("62", pixField("05", "***")),
+  ].join("");
+  const crcInput = `${payload}6304`;
+  let crc = 0xffff;
+
+  for (let index = 0; index < crcInput.length; index += 1) {
+    crc ^= crcInput.charCodeAt(index) << 8;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc & 0x8000) !== 0 ? (crc << 1) ^ 0x1021 : crc << 1;
+    }
+  }
+
+  return `${crcInput}${(crc & 0xffff).toString(16).toUpperCase().padStart(4, "0")}`;
+}
+
+function PixQrCode({ payload }) {
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    QRCode.toDataURL(payload, { errorCorrectionLevel: "M", margin: 2, width: 240 })
+      .then((dataUrl) => {
+        if (!cancelled) {
+          setResult({ payload, dataUrl });
+        }
+      })
+      .catch((error) => {
+        console.error("Não foi possível gerar o QR Code Pix.", error);
+        if (!cancelled) {
+          setResult({ payload, error: true });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [payload]);
+
+  if (!result || result.payload !== payload) {
+    return <p className="pix-qr-status">Gerando QR Code Pix...</p>;
+  }
+
+  if (result.error) {
+    return (
+      <p className="pix-qr-status" role="alert">
+        Não foi possível gerar o QR Code. Tente novamente.
+      </p>
+    );
+  }
+
+  return <img className="pix-qr-image" src={result.dataUrl} alt="QR Code para pagamento Pix" />;
+}
 
 function getCartItemId(product, format) {
   return `${product.id}-${format.id}`;
@@ -458,7 +532,9 @@ function App() {
     "",
     `Total: ${formatPrice(cartTotal)}`,
     `Forma de pagamento: ${selectedPaymentMethod.label}`,
-    "O pagamento será realizado na entrega.",
+    paymentMethod === "pix"
+      ? "Pagamento via Pix pelo QR Code."
+      : "O pagamento será realizado na entrega.",
     ...(paymentMethod === "cash" && cashChange.trim()
       ? [`Troco para: ${cashChange.trim()}`]
       : []),
@@ -819,8 +895,8 @@ function App() {
             {checkoutOpen ? (
               <div className="checkout-content">
                 <p className="checkout-intro">
-                  Escolha como prefere pagar na entrega. O WhatsApp abrirá com
-                  o resumo para você enviar à granja.
+                  Escolha a forma de pagamento. O WhatsApp abrirá com o resumo
+                  do pedido para você enviar à granja.
                 </p>
                 <div
                   className="payment-options"
@@ -844,6 +920,16 @@ function App() {
                     </button>
                   ))}
                 </div>
+                {paymentMethod === "pix" && (
+                  <div className="pix-payment">
+                    <PixQrCode payload={buildPixPayload(cartTotal)} />
+                    <p>Escaneie o QR Code ou use a chave Pix:</p>
+                    <strong className="pix-key">{PIX_KEY}</strong>
+                    <small>
+                      Recebedor: {PIX_RECEIVER} · {PIX_CITY}
+                    </small>
+                  </div>
+                )}
                 {paymentMethod === "cash" && (
                   <label className="change-field">
                     Troco para quanto?

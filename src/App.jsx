@@ -50,9 +50,9 @@ const products = [
     type: "Pato",
     category: "pato",
     detail: "Extra grandes",
-    price: 90,
+    price: 36,
     priceQuantity: 12,
-    formatPrices: { 1: 3.5, 12: 42, 30: 105 },
+    formatPrices: { 1: 3, 12: 36, 30: 90 },
     image:
       "https://commons.wikimedia.org/wiki/Special:FilePath/Duck%20eggs.jpg?width=900",
     gallery: [

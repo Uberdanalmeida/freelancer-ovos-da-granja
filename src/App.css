@@ -1112,9 +1112,12 @@ h2 i {
   height: auto;
   image-rendering: pixelated;
 }
-.pix-qr-instructions {
+ .pix-qr-instructions {
   max-width: 280px;
   line-height: 1.5;
+}
+.pix-mobile-instructions {
+  display: none;
 }
 .pix-copy-button {
   padding: 10px 14px;
@@ -1249,6 +1252,13 @@ h2 i {
   }
   .gallery-modal-footer {
     padding: 12px 14px 14px;
+  }
+  .pix-qr-image,
+  .pix-desktop-instructions {
+    display: none;
+  }
+  .pix-mobile-instructions {
+    display: inline;
   }
   .topline {
     height: 280px;

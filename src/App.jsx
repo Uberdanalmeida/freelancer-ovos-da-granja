@@ -232,8 +232,12 @@ function PixQrCode({ payload }) {
     <>
       <img className="pix-qr-image" src={result.dataUrl} alt="QR Code para pagamento Pix" />
       <p className="pix-qr-instructions">
-        Para pagar, abra o app do banco e escolha Pix &gt; Pagar com QR Code.
-        A câmera comum do celular pode não reconhecer pagamentos Pix.
+        <span className="pix-mobile-instructions">
+          No celular, copie o código e cole em Pix &gt; Pix Copia e Cola no app do banco.
+        </span>
+        <span className="pix-desktop-instructions">
+          Abra o app do banco e escaneie este QR Code por Pix &gt; Pagar com QR Code.
+        </span>
       </p>
       <button className="pix-copy-button" type="button" onClick={copyPixCode}>
         Copiar Pix copia e cola

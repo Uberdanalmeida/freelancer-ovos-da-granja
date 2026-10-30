@@ -32,6 +32,7 @@ const products = [
     name: "Ovos caipiras",
     type: "Galinha",
     category: "galinha",
+    available: true,
     detail: "Casca marrom",
     price: 30,
     priceQuantity: 30,
@@ -49,6 +50,7 @@ const products = [
     name: "Ovos de pata",
     type: "Pato",
     category: "pato",
+    available: true,
     detail: "Extra grandes",
     price: 36,
     priceQuantity: 12,
@@ -66,6 +68,7 @@ const products = [
     name: "Ovos de codorna",
     type: "Codorna",
     category: "codorna",
+    available: false,
     detail: "Casca pintada",
     price: 11.9,
     priceQuantity: 30,
@@ -83,6 +86,7 @@ const products = [
     name: "Ovos de gansa",
     type: "Ganso",
     category: "ganso",
+    available: false,
     detail: "Selecionados",
     price: 180,
     priceQuantity: 12,
@@ -100,6 +104,7 @@ const products = [
     name: "Ovos de peru",
     type: "Peru",
     category: "peru",
+    available: false,
     detail: "Produção artesanal",
     price: 25.9,
     priceQuantity: 12,
@@ -337,6 +342,7 @@ function ProductCard({ product, cart, onAdd, onOpenGallery }) {
   const [imageIndex, setImageIndex] = useState(0);
   const [addedCartId, setAddedCartId] = useState(null);
   const addedTimeoutRef = useRef(null);
+  const isUnavailable = !product.available;
   const availableFormats =
     product.category === "codorna"
       ? productFormats.filter((format) => format.quantity === 30)
@@ -365,6 +371,10 @@ function ProductCard({ product, cart, onAdd, onOpenGallery }) {
   );
 
   const handleAdd = () => {
+    if (isUnavailable) {
+      return;
+    }
+
     onAdd(product, selectedFormat);
     const cartId = getCartItemId(product, selectedFormat);
     setAddedCartId(cartId);
@@ -387,7 +397,7 @@ function ProductCard({ product, cart, onAdd, onOpenGallery }) {
   };
 
   return (
-    <article className={`product-card ${product.tone}`}>
+    <article className={`product-card ${product.tone}${isUnavailable ? " is-unavailable" : ""}`}>
       <div className="product-image-wrap">
         <button
           className="product-image-trigger"
@@ -417,7 +427,9 @@ function ProductCard({ product, cart, onAdd, onOpenGallery }) {
         >
           ›
         </button>
-        <span className="product-tag">fresco</span>
+        <span className={`product-tag${isUnavailable ? " is-unavailable" : ""}`}>
+          {isUnavailable ? "indisponível" : "fresco"}
+        </span>
         <button className="favorite" aria-label={`Favoritar ${product.name}`}>
           ♡
         </button>
@@ -434,6 +446,7 @@ function ProductCard({ product, cart, onAdd, onOpenGallery }) {
               setFormatId(event.target.value);
               setAddedCartId(null);
             }}
+            disabled={isUnavailable}
             aria-label={`Formato dos ${product.name.toLowerCase()}`}
           >
             {availableFormats.map((format) => (
@@ -459,22 +472,29 @@ function ProductCard({ product, cart, onAdd, onOpenGallery }) {
           <button
             className={`add-button${wasJustAdded ? " is-added" : ""}`}
             onClick={handleAdd}
+            disabled={isUnavailable}
             aria-label={
-              wasJustAdded
-                ? `${product.name}, formato ${selectedFormat.label} adicionado ao carrinho`
-                : isInCart
-                  ? `${product.name}, formato ${selectedFormat.label} no carrinho`
-                : `Adicionar ${product.name}, formato ${selectedFormat.label}`
+              isUnavailable
+                ? `${product.name} indisponível no momento`
+                : wasJustAdded
+                  ? `${product.name}, formato ${selectedFormat.label} adicionado ao carrinho`
+                  : isInCart
+                    ? `${product.name}, formato ${selectedFormat.label} no carrinho`
+                    : `Adicionar ${product.name}, formato ${selectedFormat.label}`
             }
           >
             <span aria-live="polite">
-              {wasJustAdded
-                ? "Adicionado ao carrinho!"
-                : isInCart
-                  ? "No carrinho"
-                  : "Adicionar ao carrinho"}
+              {isUnavailable
+                ? "Indisponível"
+                : wasJustAdded
+                  ? "Adicionado ao carrinho!"
+                  : isInCart
+                    ? "No carrinho"
+                    : "Adicionar ao carrinho"}
             </span>
-            <span aria-hidden="true">{wasJustAdded || isInCart ? "✓" : "+"}</span>
+            <span aria-hidden="true">
+              {isUnavailable ? "—" : wasJustAdded || isInCart ? "✓" : "+"}
+            </span>
           </button>
         </div>
       </div>
@@ -511,32 +531,37 @@ function App() {
     activeCategory === "todos"
       ? products
       : products.filter((product) => product.category === activeCategory);
-  const addToCart = (product, format) =>
-  setCart((current) => {
-    const cartId = getCartItemId(product, format);
-    const existingItem = current.find((item) => item.cartId === cartId);
-    const incrementValue = 1;
-
-    if (existingItem) {
-      return current.map((item) =>
-        item.cartId === cartId
-          ? { ...item, quantity: item.quantity + incrementValue }
-          : item,
-      );
+  const addToCart = (product, format) => {
+    if (!product.available) {
+      return;
     }
 
-    return [
-      ...current,
-      {
-        ...product,
-        cartId,
-        detail: `${format.label} • ${product.detail}`,
-        price: getFormatPrice(product, format),
-        quantity: incrementValue,
-        stepQuantity: incrementValue,
-      },
-    ];
-  });
+    setCart((current) => {
+      const cartId = getCartItemId(product, format);
+      const existingItem = current.find((item) => item.cartId === cartId);
+      const incrementValue = 1;
+
+      if (existingItem) {
+        return current.map((item) =>
+          item.cartId === cartId
+            ? { ...item, quantity: item.quantity + incrementValue }
+            : item,
+        );
+      }
+
+      return [
+        ...current,
+        {
+          ...product,
+          cartId,
+          detail: `${format.label} • ${product.detail}`,
+          price: getFormatPrice(product, format),
+          quantity: incrementValue,
+          stepQuantity: incrementValue,
+        },
+      ];
+    });
+  };
   const removeFromCart = (cartId) =>
   setCart((current) => current.filter((item) => item.cartId !== cartId));
   const updateCartQuantity = (cartId, change) =>
